@@ -633,21 +633,23 @@
         }
 
         function generateCSV(data, groupName) {
-            let csv = `JUNIOREN GRUPPEN - ${groupName}\n\n`;
-            csv += 'Name,Vorname,Gruppe,Position,Anwesenheit%\n';
+            let csv = `JUNIOREN GRUPPEN - ${groupName}\n`;
+            csv += 'Name,Vorname,Gruppe,Position\n';
 
             // Add grouped players
             data.groups.forEach(group => {
                 group.subgroups.forEach(subgroup => {
                     subgroup.players.forEach(player => {
-                        csv += `${player.nachname},${player.vorname},${subgroup.name},${player.position},${player.anwesenheit}%\n`;
+                        csv += `${player.nachname},${player.vorname},${subgroup.name},${player.position}\n`;
                     });
                 });
             });
 
-            // Add excluded players
-            csv += '\n=== NICHT AUSGEWÄHLTE SPIELER ===\n';
-            csv += 'Name,Vorname,Grund,Position,Anwesenheit%,Unentschuldigt\n';
+            if (data.excludedPlayersDetails.length > 0) {
+                // Add excluded players
+                csv += '\n\n=== NICHT AUSGEWÄHLTE SPIELER ===\n';
+                csv += 'Name,Vorname,Grund,Position,Anwesenheit%,Unentschuldigt\n';
+            }
 
             data.excludedPlayersDetails.forEach(player => {
                 let reason = '';
