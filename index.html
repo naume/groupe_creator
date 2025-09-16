@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junioren Gruppen Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-btn {
+            display: block;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 3px dashed #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+
+        .file-upload-btn:hover {
+            background: #e9ecef;
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .file-upload-btn.has-file {
+            background: #d4edda;
+            border-color: #4CAF50;
+            color: #155724;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .results h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .group-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            text-align: center;
+        }
+
+        .summary-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .summary-card .label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            margin-top: 20px;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .processing {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #bee5eb;
+        }
+
+        .info-box h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .group-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Junioren Gruppen Generator</h1>
+            <p>Erstelle automatisch ausgewogene Trainingsgruppen aus deiner Spielerliste</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h4>📋 So funktioniert's:</h4>
+                <ul>
+                    <li>CSV-Datei mit Spielerlisten hochladen</li>
+                    <li>Gruppenname eingeben (z.B. "E-C", "D-Junioren")</li>
+                    <li>Automatische Gruppeneinteilung nach Anwesenheit und Position</li>
+                    <li>Herunterladen der fertigen Gruppenliste</li>
+                </ul>
+            </div>
+
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="groupName">Gruppenname:</label>
+                    <input type="text" id="groupName" placeholder="z.B. E-C, D-Junioren, U15" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="csvFile">Spielerliste (CSV-Datei):</label>
+                    <div class="file-upload">
+                        <input type="file" id="csvFile" accept=".csv" required>
+                        <label for="csvFile" class="file-upload-btn">
+                            📁 CSV-Datei auswählen oder hier ablegen
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="generateBtn">
+                    🚀 Gruppen erstellen
+                </button>
+            </form>
+
+            <div id="processing" class="processing" style="display: none;">
+                <div class="spinner"></div>
+                <p>Gruppen werden erstellt...</p>
+            </div>
+
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div id="results" class="results" style="display: none;">
+                <h3>✅ Gruppen erfolgreich erstellt!</h3>
+                <div id="summary" class="group-summary"></div>
+                <button id="downloadBtn" class="btn download-btn">
+                    💾 CSV-Datei herunterladen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let processedData = null;
+        let groupName = '';
+
+        // File upload handling
+        const fileInput = document.getElementById('csvFile');
+        const fileLabel = document.querySelector('.file-upload-btn');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileLabel.textContent = `📄 ${file.name}`;
+                fileLabel.classList.add('has-file');
+            } else {
+                fileLabel.textContent = '📁 CSV-Datei auswählen oder hier ablegen';
+                fileLabel.classList.remove('has-file');
+            }
+        });
+
+        // Drag and drop
+        const fileUploadArea = document.querySelector('.file-upload');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileLabel.style.borderColor = '#4CAF50';
+            fileLabel.style.backgroundColor = '#e8f5e8';
+        }
+
+        function unhighlight(e) {
+            fileLabel.style.borderColor = '#dee2e6';
+            fileLabel.style.backgroundColor = '#f8f9fa';
+        }
+
+        fileUploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        }
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const groupNameInput = document.getElementById('groupName');
+            const file = fileInput.files[0];
+            
+            if (!file || !groupNameInput.value) {
+                showError('Bitte Gruppenname eingeben und CSV-Datei auswählen.');
+                return;
+            }
+
+            groupName = groupNameInput.value.trim();
+            
+            // Show processing
+            document.getElementById('processing').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            // Read and process file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvContent = e.target.result;
+                    processedData = processCSV(csvContent, groupName);
+                    showResults();
+                } catch (error) {
+                    console.error('Error processing CSV:', error);
+                    showError('Fehler beim Verarbeiten der CSV-Datei: ' + error.message);
+                }
+                document.getElementById('processing').style.display = 'none';
+            };
+            
+            reader.onerror = function() {
+                showError('Fehler beim Lesen der Datei.');
+                document.getElementById('processing').style.display = 'none';
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showResults() {
+            const results = document.getElementById('results');
+            const summary = document.getElementById('summary');
+            
+            // Create summary cards
+            summary.innerHTML = `
+                <div class="summary-card">
+                    <div class="number">${processedData.groups.length}</div>
+                    <div class="label">Gruppen erstellt</div>
+                </div>
+                <div class="summary-card">
+                    <div class="number">${processedData.selectedPlayers}</div>
+                    <div class="label">Ausgewählte Spieler</div>
+                </div>
+                <div class="summary-card">
+                    <div class="number">${processedData.excludedPlayers}</div>
+                    <div class="label">Ausgeschlossene Spieler</div>
+                </div>
+                <div class="summary-card">
+                    <div class="number">${processedData.goalkeepers}</div>
+                    <div class="label">Torwarte verteilt</div>
+                </div>
+            `;
+            
+            results.style.display = 'block';
+        }
+
+        // Download functionality
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (!processedData) return;
+            
+            const csv = generateCSV(processedData, groupName);
+            downloadCSV(csv, `junioren_${groupName.replace(/[^a-zA-Z0-9-_]/g, '_')}.csv`);
+        });
+
+        function processCSV(csvContent, groupName) {
+            const lines = csvContent.split('\n');
+            if (lines.length < 2) {
+                throw new Error('CSV-Datei ist leer oder hat kein gültiges Format.');
+            }
+
+            const players = [];
+            
+            // Parse players (skip header row)
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const fields = parseCSVLine(line);
+                if (fields.length < 39) continue; // Need at least 39 columns
+                
+                const player = {
+                    nachname: fields[0] || '',
+                    vorname: fields[2] || '',
+                    position: fields[24] || '?',
+                    anwesenheit: parseInt(fields[26]) || 0,
+                    unentschuldigt: parseInt(fields[31]) || 0
+                };
+                
+                players.push(player);
+            }
+
+            if (players.length === 0) {
+                throw new Error('Keine gültigen Spielerdaten gefunden.');
+            }
+
+            console.log(`Gefundene Spieler: ${players.length}`);
+
+            // Separate players by priority
+            const priority1 = players.filter(p => p.anwesenheit === 100 && p.unentschuldigt === 0);
+            const priority2 = players.filter(p => p.anwesenheit < 100 && p.anwesenheit >= 50 && p.unentschuldigt === 0)
+                                   .sort((a, b) => b.anwesenheit - a.anwesenheit);
+
+            console.log(`Priority 1 (100% attendance): ${priority1.length}`);
+            console.log(`Priority 2 (<100% but excused): ${priority2.length}`);
+
+            // Combine available players
+            const availablePlayers = [...priority1, ...priority2];
+            const excludedPlayers = players.filter(p => 
+                p.unentschuldigt > 0 || (p.anwesenheit < 50 && p.unentschuldigt === 0)
+            );
+
+            console.log(`Available players: ${availablePlayers.length}`);
+            console.log(`Excluded players: ${excludedPlayers.length}`);
+
+            // Create groups
+            const groups = createGroups(availablePlayers);
+            
+            let goalkeepers = 0;
+            groups.forEach(group => {
+                group.subgroups.forEach(subgroup => {
+                    subgroup.players.forEach(player => {
+                        if (isGoalkeeper(player.position)) {
+                            goalkeepers++;
+                        }
+                    });
+                });
+            });
+
+            return {
+                groups: groups,
+                excludedPlayers: excludedPlayers.length,
+                selectedPlayers: availablePlayers.length,
+                goalkeepers: goalkeepers,
+                excludedPlayersDetails: excludedPlayers
+            };
+        }
+
+        function parseCSVLine(line) {
+            const fields = [];
+            let field = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ';' && !inQuotes) {
+                    fields.push(field);
+                    field = '';
+                } else {
+                    field += char;
+                }
+            }
+            
+            fields.push(field);
+            return fields;
+        }
+
+        function isGoalkeeper(position) {
+            const pos = position.toLowerCase();
+            return pos.includes('libero') || pos.includes('tw') || pos.includes('torwart');
+        }
+
+        function createGroups(players) {
+            const groups = [];
+            let playerIndex = 0;
+            let groupNumber = 1;
+
+            while (playerIndex < players.length) {
+                // Take up to 12 players for this batch
+                const batchSize = Math.min(12, players.length - playerIndex);
+                if (batchSize < 3) break; // Not enough players for more groups
+
+                const batch = players.slice(playerIndex, playerIndex + batchSize);
+
+                // Ensure goalkeeper distribution
+                ensureGoalkeeperInBatch(batch, players, playerIndex + batchSize);
+
+                // Create subgroups (4 subgroups of 3 players each, or as many as we can)
+                const subgroups = [];
+                
+                // Group 1 subgroups
+                if (batch.length >= 3) {
+                    subgroups.push({
+                        name: `${groupNumber}.1`,
+                        players: batch.slice(0, 3)
+                    });
+                }
+                if (batch.length >= 6) {
+                    subgroups.push({
+                        name: `${groupNumber}.2`,
+                        players: batch.slice(3, 6)
+                    });
+                }
+
+                // Group 2 subgroups (if we have enough players)
+                if (batch.length >= 9) {
+                    subgroups.push({
+                        name: `${groupNumber + 1}.1`,
+                        players: batch.slice(6, 9)
+                    });
+                }
+                if (batch.length >= 12) {
+                    subgroups.push({
+                        name: `${groupNumber + 1}.2`,
+                        players: batch.slice(9, 12)
+                    });
+                }
+
+                groups.push({
+                    number: groupNumber,
+                    subgroups: subgroups
+                });
+
+                playerIndex += batchSize;
+                groupNumber += 2; // We create 2 main groups at once
+            }
+
+            return groups;
+        }
+
+        function ensureGoalkeeperInBatch(batch, allPlayers, currentIndex) {
+            // Check if batch has a goalkeeper
+            const hasGoalkeeper = batch.some(player => isGoalkeeper(player.position));
+            
+            if (!hasGoalkeeper && currentIndex < allPlayers.length) {
+                // Look for a goalkeeper in remaining players
+                for (let i = currentIndex; i < allPlayers.length; i++) {
+                    if (isGoalkeeper(allPlayers[i].position)) {
+                        // Swap with first player in batch
+                        const temp = batch[0];
+                        batch[0] = allPlayers[i];
+                        allPlayers[i] = temp;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function generateCSV(data, groupName) {
+            let csv = `JUNIOREN GRUPPEN - ${groupName}\n\n`;
+            csv += 'Name,Vorname,Gruppe,Position,Anwesenheit%\n';
+
+            // Add grouped players
+            data.groups.forEach(group => {
+                group.subgroups.forEach(subgroup => {
+                    subgroup.players.forEach(player => {
+                        csv += `${player.nachname},${player.vorname},${subgroup.name},${player.position},${player.anwesenheit}%\n`;
+                    });
+                });
+            });
+
+            // Add excluded players
+            csv += '\n=== NICHT AUSGEWÄHLTE SPIELER ===\n';
+            csv += 'Name,Vorname,Grund,Position,Anwesenheit%,Unentschuldigt\n';
+
+            data.excludedPlayersDetails.forEach(player => {
+                let reason = '';
+                if (player.unentschuldigt > 0) {
+                    reason = `Unentschuldigt (${player.unentschuldigt})`;
+                } else if (player.anwesenheit < 50) {
+                    reason = 'Niedrige Anwesenheit';
+                }
+                
+                csv += `${player.nachname},${player.vorname},${reason},${player.position},${player.anwesenheit}%,${player.unentschuldigt}\n`;
+            });
+
+            return csv;
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>
